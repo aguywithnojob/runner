@@ -1,0 +1,14 @@
+name: Health Check BE
+
+on:
+  schedule:
+    - cron: '*/3 14-21 * * *'  # Every 5 minutes from 2 PM to 9 PM UTC
+  workflow_dispatch: 
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Healhcheck
+        run: |
+          curl -s BASE_URL/health/ | grep -i "ok" || (echo "❌ Website is down" && exit 1)
