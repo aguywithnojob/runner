@@ -1,4 +1,4 @@
-** Workflow helpful for future use.
+* Workflow helpful for future use *
 1. Auto PR creator with a label "AUTO-PR".
 2. Auto PR merger based on label "Merge-Ready".
 3. Deploy will deploy to either pythonanywhere or Render if anything else require can be added.
