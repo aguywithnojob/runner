@@ -1,0 +1,107 @@
+name: Deploy to Anywhere
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '.github/workflows/**'
+
+concurrency:
+  group: deploy-to-anywhere
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, linux, x64, dgckart-label]
+
+    steps:
+      
+      - name: Deploy Django App
+        run: |
+          echo "Deploying Django app to Anywhere..."
+          cd /home/dgckart
+          ./deploy.sh
+          exit 0
+
+      # - name: Set up Python
+      #   uses: actions/setup-python@v4
+      #   with:
+      #     python-version: '3.10'
+
+      # - name: Install dependencies
+      #   run: |
+      #     python -m pip install --upgrade pip
+      #     pip install -r requirements.txt
+      
+      # - name: Populating Database
+      #   env:
+      #     DJANGO_SETTINGS_MODULE: pharmacy.settings
+      #     SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      #     DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      #   run: |
+      #     python scripts/populate.py
+      
+      # - name: Prepare Django (migrate)
+      #   env:
+      #     DJANGO_SETTINGS_MODULE: pharmacy.settings
+      #     SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      #     DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      #   run: |
+      #     echo "Running Django migrations and creating superuser"
+      #     python manage.py makemigrations
+      #     python manage.py migrate
+      #     echo "Populating categries and subcategories"
+      
+      # - name: Create superuser
+        # python scripts/populate.py
+      #   env:
+      #     DJANGO_SUPERUSER_USERNAME: admin
+      #     DJANGO_SUPERUSER_EMAIL: admin@example.com
+      #     DJANGO_SUPERUSER_PASSWORD: admin
+      #     DJANGO_SETTINGS_MODULE: pharmacy.settings
+      #     SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      #     DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      #   run: |
+      #     python manage.py createsuperuser --noinput || echo "Superuser already exists"
+        
+      # - name: Trigger Render deploy
+      #   run: |
+      #     echo "Triggering Render deploy..."
+      #     RESPONSE=$(curl -s -w "%{http_code}" -o response.json -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }})
+      #     HTTP_STATUS=$(tail -n1 <<< "$RESPONSE")
+          
+      #     if [ "$HTTP_STATUS" -ne 200 ]; then
+      #       echo "Render deploy failed with status $HTTP_STATUS"
+      #       cat response.json
+      #       exit 1
+      #     fi
+          
+      #     echo "Render deploy triggered successfully. Response:"
+      #     cat response.json
+
+      #     # Extract deploy ID using jq
+      #     DEPLOY_ID=$(jq -r '.deploy.id' response.json)
+      #     echo "Deploy ID: $DEPLOY_ID"
+
+      #     # Poll Render API for deployment status
+      #     echo "🚀 Deployment Started..."
+      #     for i in {1..20}; do
+      #       STATUS=$(curl -s -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+      #         https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys/$DEPLOY_ID \
+      #         | jq -r '.status')
+
+      #       echo "Attempt $i: ⏳ Waiting..."
+
+      #       if [ "$STATUS" == "live" ]; then
+      #         echo "✅ Deployment successful!"
+      #         break
+      #       elif [ "$STATUS" == "failed" ]; then
+      #         echo "❌ Deployment failed!"
+      #         exit 1
+      #       elif [ "$STATUS" == "build_in_progress" ]; then
+      #         echo "🟡 Deployment In Progress"
+      #       fi
+
+      #       sleep 18
+      #     done
