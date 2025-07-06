@@ -1,0 +1,41 @@
+name: PR creator
+
+on:
+  push:
+    branches-ignore:
+      - master
+      - main
+
+jobs:
+  auto-pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the current branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  
+
+      - name: Create Pull Request from current branch to master
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          CURRENT_BRANCH="${GITHUB_REF#refs/heads/}"
+          echo "Current branch: $CURRENT_BRANCH"
+
+          # Check if a PR already exists
+          PR_EXISTS=$(gh pr list --base master --head "$CURRENT_BRANCH" --state open --json number | jq '.[0]')
+
+          if [ "$PR_EXISTS" = "null" ]; then
+            echo "No open PR found. Creating one..."
+            gh pr create \
+              --title "Auto PR from $CURRENT_BRANCH to master" \
+              --body "This PR was auto-created from the latest push to \`$CURRENT_BRANCH\`." \
+              --base master \
+              --head "$CURRENT_BRANCH" \
+              --label "AUTO-PR" \
+              --assignee "${{ github.actor }}" \
+              --reviewer "${{ github.actor }}" 
+          else
+            echo "Open PR already exists for $CURRENT_BRANCH → master. Skipping."
+          fi
